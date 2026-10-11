@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Register Pro</title>
+<style>
+:root{--bg:#eef2f1;--card:#fff;--ink:#1f2a37;--mute:#5d6b78;--line:#d3dcdb;--acc:#1f5f8b;--acc-ink:#fff;--hi:#f2c94c;--bad:#b3261e;--ok:#2e7d52}
+[data-theme="dark"]{--bg:#141b21;--card:#1c262e;--ink:#e6edf0;--mute:#93a3ae;--line:#2b3943;--acc:#6bb3e0;--acc-ink:#0d1a24;--bad:#ff8a80;--ok:#7fd1a0}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;transition:background .3s,color .3s}
+main{max-width:1040px;margin:0 auto;padding:24px 16px 56px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.hb{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:800;margin:0 0 4px;letter-spacing:-.02em;line-height:1.05}
+h1 span{background:linear-gradient(transparent 62%,var(--hi) 62%) no-repeat 0 0/0% 100%;padding:0 4px;animation:mark .8s .3s ease forwards}
+@keyframes mark{to{background-size:100% 100%}}
+.sub{color:var(--mute);margin:0 0 24px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat,.panel,.wrap{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.stat{padding:12px 14px;animation:rise .5s both}
+.stat:nth-child(2){animation-delay:.08s}.stat:nth-child(3){animation-delay:.16s}.stat:nth-child(4){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.stat b{display:block;font-size:1.6rem;font-weight:800}
+.stat small{color:var(--mute)}
+.panel{padding:14px 16px;margin-bottom:20px}
+.panel h3{margin:0 0 10px;font-size:1rem}
+.gr{display:grid;grid-template-columns:44px 1fr 28px;align-items:center;gap:10px;margin:6px 0;font-size:.9rem}
+.track{background:color-mix(in srgb,var(--acc) 12%,transparent);border-radius:99px;height:10px;overflow:hidden}
+.fill{height:100%;background:var(--acc);border-radius:99px;width:0;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+input,select,button{font:inherit;color:inherit}
+input,select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-width:0}
+.bar input{flex:1 1 200px}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 14px;transition:transform .12s,box-shadow .2s}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
+button:active{transform:scale(.97)}
+button.p{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+button.link{border:0;background:none;color:var(--acc);padding:4px 6px;box-shadow:none}
+button.link.d{color:var(--bad)}
+:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--mute);font-size:.9rem;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--ink)}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:color-mix(in srgb,var(--acc) 7%,transparent)}
+tbody tr.in{animation:rise .4s both}
+tbody tr.out{animation:out .3s forwards}
+@keyframes out{to{opacity:0;transform:translateX(30px)}}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:600;font-size:.85rem;background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.pill.low{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.pill.good{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.empty{padding:32px;text-align:center;color:var(--mute)}
+.pager{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--mute)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:22px;width:min(440px,92vw)}
+dialog[open]{animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.92) translateY(10px)}}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{margin:0 0 14px}
+label{display:block;margin-bottom:10px;font-size:.9rem;color:var(--mute)}
+label input,label select{display:block;width:100%;margin-top:4px;color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.act{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;opacity:0;transition:.3s;z-index:9}
+#toast.show{transform:translate(-50%,0);opacity:1}
+/* creator credit */
+.credit{position:fixed;right:16px;bottom:16px;z-index:8;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;background:var(--card);border:1px solid var(--line);border-radius:99px;box-shadow:0 6px 18px rgba(0,0,0,.14);font-size:.85rem;animation:slidein .8s 1.2s cubic-bezier(.2,.9,.3,1.2) both;transition:transform .2s}
+.credit:hover{transform:translateY(-3px)}
+.credit .dot{width:10px;height:10px;border-radius:50%;background:var(--ok);animation:pulse 1.8s infinite}
+.credit small{color:var(--mute);display:block;line-height:1.1}
+.credit b{font-weight:800;background:linear-gradient(90deg,var(--acc),var(--hi),var(--acc)) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite}
+@keyframes slidein{from{opacity:0;transform:translateX(60px)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}70%,100%{box-shadow:0 0 0 10px transparent}}
+@keyframes shine{to{background-position:-200% 0}}
+@media (max-width:520px){.credit{left:12px;right:12px;justify-content:center;bottom:10px}}
+/* login + welcome */
+.screen{min-height:100vh;display:grid;place-items:center;padding:24px 16px;position:relative;overflow:hidden}
+.lc{width:min(400px,100%);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;animation:pop .5s both}
+.lc h1{font-size:2rem}
+.lc .chk{display:flex;align-items:center;gap:8px;margin:0 0 14px}
+.lc .chk input{width:auto;margin:0}
+.lc button.p{width:100%;padding:11px}
+.hint{font-size:.85rem;color:var(--mute);margin:14px 0 0;text-align:center}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#welcome{text-align:center;flex-direction:column}
+.orb{position:absolute;border-radius:50%;background:var(--acc);opacity:.14;animation:float 7s ease-in-out infinite}
+.orb:nth-child(1){width:260px;height:260px;left:-60px;top:-40px}
+.orb:nth-child(2){width:180px;height:180px;right:6%;top:18%;animation-delay:-2s;background:var(--hi)}
+.orb:nth-child(3){width:320px;height:320px;right:-90px;bottom:-110px;animation-delay:-4s}
+@keyframes float{50%{transform:translateY(-28px) scale(1.06)}}
+.wbox{position:relative;z-index:1}
+.ring{width:96px;height:96px;margin:0 auto 18px;display:block}
+.ring circle{fill:none;stroke:var(--ok);stroke-width:5;stroke-dasharray:283;stroke-dashoffset:283;transform:rotate(-90deg);transform-origin:center;animation:draw .9s .1s ease forwards}
+.ring path{fill:none;stroke:var(--ok);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s .9s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.wt{font-size:clamp(2rem,8vw,4rem);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0}
+.wt i{display:inline-block;font-style:normal;opacity:0;transform:translateY(40px) rotate(6deg);animation:letter .6s cubic-bezier(.2,.9,.3,1.4) forwards}
+@keyframes letter{to{opacity:1;transform:none}}
+.ws{color:var(--mute);margin:12px 0 22px;opacity:0;animation:fade .6s 1.6s forwards}
+@keyframes fade{to{opacity:1}}
+.load{width:min(260px,70vw);height:6px;margin:0 auto 20px;border-radius:99px;background:color-mix(in srgb,var(--acc) 15%,transparent);overflow:hidden}
+.load b{display:block;height:100%;width:0;background:var(--acc);animation:fillbar 3.2s 1s linear forwards}
+@keyframes fillbar{to{width:100%}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}h1 span{background-size:100% 100%}.wt i,.ws{opacity:1;transform:none}.ring circle,.ring path{stroke-dashoffset:0}.load b{width:100%}}
+</style>
+</head>
+<body>
+
+<section class="screen" id="login" hidden>
+  <form class="lc" id="lf" autocomplete="on">
+    <h1>Student <span>Register</span></h1>
+    <p class="sub">Sign in to manage marks and attendance.</p>
+    <label>Username<input id="lu" autocomplete="username" required autofocus></label>
+    <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
+    <label class="chk"><input type="checkbox" id="sp"> Show password</label>
+    <p id="lerr" style="color:var(--bad);margin:0 0 10px;min-height:1.5em" role="alert"></p>
+    <button class="p">Sign in</button>
+    <p class="hint">Demo login: <b>admin</b> / <b>admin123</b></p>
+  </form>
+</section>
+
+<section class="screen" id="welcome" hidden>
+  <div class="orb"></div><div class="orb"></div><div class="orb"></div>
+  <div class="wbox">
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45"/><path d="M30 52l14 14 27-30"/></svg>
+    <h2 class="wt" id="wt" aria-live="polite"></h2>
+    <p class="ws">Your student register is ready.</p>
+    <div class="load"><b></b></div>
+    <button class="p" id="enter">Open register</button>
+  </div>
+</section>
+
+<main id="app" hidden>
+  <header>
+    <div>
+      <h1>Student <span>Register</span></h1>
+      <p class="sub">Track marks and attendance, spot who needs help, export when you need to.</p>
+    </div>
+    <div class="hb"><button id="theme" aria-label="Switch theme">Dark mode</button><button id="out">Log out</button></div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b id="sTotal">0</b><small>Students</small></div>
+    <div class="stat"><b id="sAvg">0%</b><small>Average marks</small></div>
+    <div class="stat"><b id="sAtt">0%</b><small>Average attendance</small></div>
+    <div class="stat"><b id="sTop">–</b><small>Top scorer</small></div>
+  </div>
+
+  <div class="panel">
+    <h3>Grade distribution</h3>
+    <div id="chart"></div>
+  </div>
+
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search by name, roll no or email" aria-label="Search students">
+    <select id="fc" aria-label="Filter by course"><option value="">All courses</option></select>
+    <select id="fg" aria-label="Filter by status">
+      <option value="">All students</option><option value="risk">Low attendance (&lt;75%)</option><option value="top">Top performers (A+)</option>
+    </select>
+    <button id="csv">Export CSV</button>
+    <button class="p" id="add">Add student</button>
+  </div>
+
+  <div class="wrap">
+    <table>
+      <thead><tr>
+        <th data-k="roll">Roll no</th><th data-k="name">Name</th><th data-k="course">Course</th>
+        <th data-k="year">Year</th><th data-k="marks">Marks</th><th data-k="att">Attendance</th><th></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden>No students found. Add one to get started.</div>
+  </div>
+  <div class="pager"><span id="count"></span><span><button id="prev">Previous</button> <button id="next">Next</button></span></div>
+</main>
+
+<dialog id="dlg">
+  <form id="f" method="dialog">
+    <h2 id="dt">Add student</h2>
+    <label>Full name<input id="name" required></label>
+    <div class="row">
+      <label>Roll no<input id="roll" required></label>
+      <label>Year<select id="year"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+    </div>
+    <label>Email<input id="email" type="email" required></label>
+    <label>Course<input id="course" list="cl" required></label>
+    <datalist id="cl"><option>Computer Science</option><option>Electronics</option><option>Mechanical</option><option>Commerce</option></datalist>
+    <div class="row">
+      <label>Marks (%)<input id="marks" type="number" min="0" max="100" required></label>
+      <label>Attendance (%)<input id="att" type="number" min="0" max="100" required></label>
+    </div>
+    <p id="err" style="color:var(--bad);margin:0" role="alert"></p>
+    <div class="act"><button type="button" id="cancel">Cancel</button><button class="p">Save student</button></div>
+  </form>
+</dialog>
+<aside class="credit" aria-label="Creators"><span class="dot"></span><span><small>Created by</small><b>Furkhan &amp; Syed Rihan</b></span></aside>
+<div id="toast" role="status"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY="student-register-pro-v1",PER=8,USER="admin",PASS="admin123";
+let students=[],editId=null,sortK="name",sortDir=1,page=0,firstPaint=true;
+try{students=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){}
+if(!students.length)students=[
+ {id:1,name:"Ananya Rao",roll:"CS101",email:"ananya@example.com",course:"Computer Science",year:"2",marks:91,att:96},
+ {id:2,name:"Rohit Kumar",roll:"EC204",email:"rohit@example.com",course:"Electronics",year:"3",marks:78,att:72},
+ {id:3,name:"Meera Shetty",roll:"CM112",email:"meera@example.com",course:"Commerce",year:"1",marks:85,att:89},
+ {id:4,name:"Kiran Patil",roll:"ME310",email:"kiran@example.com",course:"Mechanical",year:"3",marks:62,att:68},
+ {id:5,name:"Sneha Gowda",roll:"CS118",email:"sneha@example.com",course:"Computer Science",year:"1",marks:94,att:91}];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(students))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const grade=m=>m>=90?"A+":m>=80?"A":m>=70?"B":m>=60?"C":"D";
+function toast(t){const el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),2200)}
+function countUp(el,to,suffix=""){
+  const dec=String(to).includes(".")?1:0,t0=performance.now();
+  const from=parseFloat(el.dataset.v||0);el.dataset.v=to;
+  (function step(t){const p=Math.min((t-t0)/700,1),e=1-Math.pow(1-p,3);
+    el.textContent=(from+(to-from)*e).toFixed(dec)+suffix;if(p<1)requestAnimationFrame(step)})(t0);
+}
+function filtered(){
+  const q=$("q").value.toLowerCase(),fc=$("fc").value,fg=$("fg").value;
+  return students.filter(s=>(!fc||s.course===fc)&&(!fg||(fg==="risk"?s.att<75:grade(s.marks)==="A+"))
+    &&`${s.name} ${s.roll} ${s.email}`.toLowerCase().includes(q))
+    .sort((a,b)=>{const x=a[sortK],y=b[sortK];return (typeof x==="number"?x-y:String(x).localeCompare(String(y),undefined,{numeric:true}))*sortDir});
+}
+function render(){
+  const fc=$("fc").value;
+  const courses=[...new Set(students.map(s=>s.course))].sort();
+  $("fc").innerHTML='<option value="">All courses</option>'+courses.map(c=>`<option ${c===fc?"selected":""}>${esc(c)}</option>`).join("");
+  const all=filtered(),pages=Math.max(1,Math.ceil(all.length/PER));
+  page=Math.min(page,pages-1);
+  const list=all.slice(page*PER,page*PER+PER);
+  $("rows").innerHTML=list.map((s,i)=>`<tr class="${firstPaint?"in":""}" style="animation-delay:${i*50}ms" data-id="${s.id}">
+    <td>${esc(s.roll)}</td><td>${esc(s.name)}<br><small style="color:var(--mute)">${esc(s.email)}</small></td>
+    <td>${esc(s.course)}</td><td>${esc(s.year)}</td>
+    <td><span class="pill ${s.marks<60?"low":""}">${s.marks}% · ${grade(s.marks)}</span></td>
+    <td><span class="pill ${s.att<75?"low":"good"}">${s.att}%</span></td>
+    <td><button class="link" data-e="${s.id}">Edit</button><button class="link d" data-d="${s.id}">Delete</button></td></tr>`).join("");
+  firstPaint=false;
+  $("empty").hidden=all.length>0;
+  $("count").textContent=`${all.length} student${all.length===1?"":"s"} · page ${page+1} of ${pages}`;
+  $("prev").disabled=page===0;$("next").disabled=page>=pages-1;
+  stats();
+}
+function stats(){
+  const n=students.length,avg=k=>n?students.reduce((a,s)=>a+s[k],0)/n:0;
+  countUp($("sTotal"),n);countUp($("sAvg"),+avg("marks").toFixed(1),"%");countUp($("sAtt"),+avg("att").toFixed(1),"%");
+  const top=students.reduce((a,s)=>!a||s.marks>a.marks?s:a,null);
+  $("sTop").textContent=top?top.name.split(" ")[0]:"–";
+  const g={"A+":0,A:0,B:0,C:0,D:0};students.forEach(s=>g[grade(s.marks)]++);
+  $("chart").innerHTML=Object.entries(g).map(([k,v])=>`<div class="gr"><span>${k}</span><div class="track"><div class="fill" data-w="${n?v/n*100:0}"></div></div><span>${v}</span></div>`).join("");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%")));
+}
+function openForm(s){
+  editId=s?s.id:null;$("err").textContent="";
+  $("dt").textContent=s?"Edit student":"Add student";
+  for(const k of["name","roll","email","course","year","marks","att"])$(k).value=s?s[k]:(k==="year"?"1":"");
+  $("dlg").showModal();$("name").focus();
+}
+$("add").onclick=()=>openForm();
+$("cancel").onclick=()=>$("dlg").close();
+$("f").onsubmit=e=>{
+  e.preventDefault();
+  const d={name:$("name").value.trim(),roll:$("roll").value.trim(),email:$("email").value.trim(),course:$("course").value.trim(),
+    year:$("year").value,marks:Number($("marks").value),att:Number($("att").value)};
+  if(students.some(s=>s.roll.toLowerCase()===d.roll.toLowerCase()&&s.id!==editId)){
+    $("err").textContent="That roll number is already in use. Enter a different one.";return}
+  if(editId){students=students.map(s=>s.id===editId?{...s,...d}:s);toast("Student updated")}
+  else{students.push({id:Date.now(),...d});toast("Student added")}
+  save();render();$("dlg").close();
+};
+$("rows").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.e)openForm(students.find(s=>s.id==b.dataset.e));
+  if(b.dataset.d&&confirm("Delete this student?")){
+    const tr=b.closest("tr");tr.classList.remove("in");tr.classList.add("out");
+    setTimeout(()=>{students=students.filter(s=>s.id!=b.dataset.d);save();render();toast("Student deleted")},280);
+  }
+};
+document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k;sortDir=sortK===k?-sortDir:1;sortK=k;render();
+});
+["q","fc","fg"].forEach(id=>$(id).addEventListener("input",()=>{page=0;render()}));
+$("prev").onclick=()=>{page--;render()};$("next").onclick=()=>{page++;render()};
+$("csv").onclick=()=>{
+  const cols=["roll","name","email","course","year","marks","att"];
+  const rows=[cols.join(",")].concat(filtered().map(s=>cols.map(c=>`"${String(s[c]).replace(/"/g,'""')}"`).join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
+  a.download="students.csv";a.click();toast("CSV exported");
+};
+let th;try{th=localStorage.getItem("sr-theme")}catch(e){}
+th=th||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+function setTheme(t){document.documentElement.dataset.theme=t;$("theme").textContent=t==="dark"?"Light mode":"Dark mode";try{localStorage.setItem("sr-theme",t)}catch(e){}}
+$("theme").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+setTheme(th);
+
+/* auth flow: login -> welcome -> app */
+let timer;
+function show(id){["login","welcome","app"].forEach(s=>$(s).hidden=s!==id)}
+function sess(v){try{v===null?sessionStorage.removeItem("sr-user"):v?sessionStorage.setItem("sr-user",v):0;return sessionStorage.getItem("sr-user")}catch(e){return null}}
+function openApp(){clearTimeout(timer);show("app");firstPaint=true;render()}
+function welcome(name){
+  show("welcome");
+  const t=$("wt");t.innerHTML="";
+  [...("Welcome, "+name)].forEach((c,i)=>{const s=document.createElement("i");s.textContent=c===" "?"\u00a0":c;s.style.animationDelay=(0.9+i*0.05)+"s";t.appendChild(s)});
+  timer=setTimeout(openApp,4400);
+}
+$("sp").onchange=e=>$("lp").type=e.target.checked?"text":"password";
+$("lf").onsubmit=e=>{
+  e.preventDefault();
+  const u=$("lu").value.trim(),p=$("lp").value;
+  if(u.toLowerCase()===USER&&p===PASS){$("lerr").textContent="";sess(u);welcome(u.charAt(0).toUpperCase()+u.slice(1))}
+  else{$("lerr").textContent="Wrong username or password. Check both and try again.";const c=$("lf");c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake");$("lp").select()}
+};
+$("enter").onclick=openApp;
+$("out").onclick=()=>{sess(null);$("lf").reset();$("lerr").textContent="";show("login");$("lu").focus()};
+sess()?openApp():show("login");
+</script>
+</body>
+</html>
